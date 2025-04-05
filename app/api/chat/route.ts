@@ -4,6 +4,13 @@ export async function POST(request: Request) {
   try {
     const { messages } = await request.json();
     
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json(
+        { error: 'Invalid request format. Messages array is required.' },
+        { status: 400 }
+      );
+    }
+    
     const GROK_API_KEY = process.env.GROK_API_KEY || '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';
     
     // Format messages for Grok AI
@@ -33,13 +40,14 @@ export async function POST(request: Request) {
     }
 
     // Make request to Grok AI API
-    const response = await fetch('https://api.grok.ai/v1/chat/completions', {
+    const response = await fetch('https://api.grok-ai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        model: 'grok-1',
         messages: formattedMessages,
         temperature: 0.7,
         max_tokens: 1000
@@ -47,10 +55,16 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to get response from Grok AI');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Grok AI Error:', errorData);
+      throw new Error(errorData.error?.message || 'Failed to get response from Grok AI');
     }
 
     const data = await response.json();
+    
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response format from Grok AI');
+    }
     
     return NextResponse.json({
       message: data.choices[0].message.content,
@@ -61,8 +75,9 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to process request';
     return NextResponse.json(
-      { error: 'Failed to process request' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

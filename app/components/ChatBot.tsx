@@ -5,8 +5,12 @@ import { FaComments, FaPaperPlane, FaTimes } from 'react-icons/fa';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([
-    { text: 'Hello! I\'m here to help you with Bible study and answer questions about Rise-Up Bible Church. How can I assist you today?', isUser: false },
+  const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean; role: 'user' | 'assistant' | 'system' }>>([
+    { 
+      text: 'Hello! I\'m here to help you with Bible study and answer questions about Rise-Up Bible Church. How can I assist you today?',
+      isUser: false,
+      role: 'assistant'
+    },
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +31,7 @@ const ChatBot = () => {
     // Add user message
     const newMessages = [
       ...messages,
-      { text: inputText, isUser: true },
+      { text: inputText, isUser: true, role: 'user' },
     ];
     setMessages(newMessages);
     setInputText('');
@@ -41,7 +45,7 @@ const ChatBot = () => {
         },
         body: JSON.stringify({
           messages: newMessages.map(msg => ({
-            role: msg.isUser ? 'user' : 'assistant',
+            role: msg.role,
             content: msg.text
           }))
         }),
@@ -52,6 +56,10 @@ const ChatBot = () => {
       }
 
       const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
       
       // Create a formatted message that includes verses and explanation if available
       let formattedMessage = data.message;
@@ -67,7 +75,7 @@ const ChatBot = () => {
       
       setMessages([
         ...newMessages,
-        { text: formattedMessage, isUser: false },
+        { text: formattedMessage, isUser: false, role: 'assistant' },
       ]);
     } catch (error) {
       console.error('Error:', error);
@@ -76,6 +84,7 @@ const ChatBot = () => {
         {
           text: 'I apologize, but I encountered an error. Please try asking your question again.',
           isUser: false,
+          role: 'assistant'
         },
       ]);
     } finally {
