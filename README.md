@@ -68,3 +68,44 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For any inquiries, please contact:
 - Email: info@riseupchurch.org
 - Phone: +27 76 025 0626 
+
+# Together AI Chatbot
+
+A simple chatbot application using Together AI's API to access the Llama-3.3-70B-Instruct-Turbo model.
+
+## Prerequisites
+
+- Python 3.8+
+- Together AI API key (get one from [together.ai](https://together.ai))
+
+## Installation
+
+1. Install the required package:
+
+```bash
+pip install together
+```
+
+## Usage
+
+1. Run the chatbot:
+
+```bash
+python chatbot.py
+```
+
+2. When prompted, enter your Together AI API key (or set it as an environment variable named `TOGETHER_API_KEY` before running).
+
+3. Start chatting with the model! Type 'exit', 'quit', or 'bye' to end the conversation.
+
+## Features
+
+- Maintains conversation history for contextual responses
+- Simple command-line interface
+- Error handling for API issues
+
+## Configuration
+
+You can modify the following parameters in `chatbot.py`:
+- `temperature`: Controls randomness (0.7 by default)
+- `max_tokens`: Maximum length of responses (1024 by default) 
