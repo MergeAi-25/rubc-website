@@ -1,47 +1,47 @@
 # Rise-Up Bible Church Website
 
-This is the official website for Rise-Up Bible Church, featuring information about our church, weekly gatherings, and upcoming events.
+A modern, responsive website for Rise-Up Bible Church built with Next.js and Tailwind CSS.
 
 ## Features
 
 - Modern, responsive design
-- Weekly gathering schedule
-- Vision, Mission & Values
-- Events calendar
-- Blog section
-- Email newsletter subscription
-- AI-powered Bible study chatbot
+- Interactive Bible Study Chat Assistant
+- Weekly gatherings information
+- Vision, Mission, and Values
+- Church events and blog
+- Contact information
 
-## Getting Started
+## Tech Stack
 
-### Prerequisites
+- Next.js 14
+- React
+- Tailwind CSS
+- Together.ai API for chat functionality
 
-- Node.js 18.x or later
-- npm or yarn package manager
+## Development
 
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/your-username/rise-up-bible-church.git
-cd rise-up-bible-church
-```
-
+1. Clone the repository
 2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file with your Together.ai API key:
+   ```
+   TOGETHER_API_KEY=your_api_key_here
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-3. Run the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
+## Deployment
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the website.
+This website is deployed on Vercel. For deployment:
+
+1. Push your changes to GitHub
+2. Connect your GitHub repository to Vercel
+3. Add your Together.ai API key to Vercel's environment variables
+4. Deploy!
 
 ## Project Structure
 

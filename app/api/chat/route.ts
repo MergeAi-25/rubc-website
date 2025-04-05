@@ -246,18 +246,30 @@ export async function POST(request: Request) {
       }
 
       const data = await response.json();
-      return NextResponse.json({ response: data.output.choices[0].text });
+      return NextResponse.json({
+        message: data.output.choices[0].text,
+        verses: [],
+        explanation: '',
+        suggestedTopics: Object.keys(bibleTopics)
+      });
     }
 
     // If no API key and no local match, return a default response
     return NextResponse.json({
       message: "I can help you with topics like salvation, prayer, faith, grace, church, worship, and baptism. What would you like to know about?",
+      verses: [],
+      explanation: '',
       suggestedTopics: Object.keys(bibleTopics)
     });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(
-      { error: 'Failed to process your request' },
+      {
+        message: 'I apologize, but I encountered an error. Please try asking your question again.',
+        verses: [],
+        explanation: '',
+        suggestedTopics: Object.keys(bibleTopics)
+      },
       { status: 500 }
     );
   }

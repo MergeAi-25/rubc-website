@@ -52,9 +52,22 @@ const ChatBot = () => {
       }
 
       const data = await response.json();
+      
+      // Create a formatted message that includes verses and explanation if available
+      let formattedMessage = data.message;
+      if (data.verses && data.verses.length > 0) {
+        formattedMessage += '\n\nScripture References:\n' + data.verses.join('\n');
+      }
+      if (data.explanation) {
+        formattedMessage += '\n\n' + data.explanation;
+      }
+      if (data.relatedTopics && data.relatedTopics.length > 0) {
+        formattedMessage += '\n\nRelated Topics: ' + data.relatedTopics.join(', ');
+      }
+      
       setMessages([
         ...newMessages,
-        { text: data.response, isUser: false },
+        { text: formattedMessage, isUser: false },
       ]);
     } catch (error) {
       console.error('Error:', error);
