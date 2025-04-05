@@ -1,15 +1,15 @@
 import os
 import json
 import datetime
-from together import Together
+import requests
 
 def get_api_key():
-    """Get the Together AI API key from environment variable or user input."""
-    api_key = os.environ.get("TOGETHER_API_KEY")
+    """Get the Grok AI API key from environment variable or user input."""
+    api_key = os.environ.get("GROK_API_KEY")
     if not api_key:
-        api_key = input("Please enter your Together AI API key: ")
+        api_key = input("Please enter your Grok AI API key: ")
         # Store temporarily for this session
-        os.environ["TOGETHER_API_KEY"] = api_key
+        os.environ["GROK_API_KEY"] = api_key
     return api_key
 
 def save_conversation(messages, filename=None):
@@ -85,13 +85,16 @@ def list_saved_conversations():
         print(f"Error listing conversations: {e}")
 
 def chat_with_llama():
-    """Run a simple chat interface with the Llama model."""
-    # Initialize the Together client with API key
+    """Run a simple chat interface with the Grok model."""
+    # Initialize the API key
     try:
         api_key = get_api_key()
-        client = Together(api_key=api_key)
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
     except Exception as e:
-        print(f"Error initializing Together client: {e}")
+        print(f"Error initializing Grok API: {e}")
         return
     
     # System prompt to guide the model's behavior
@@ -104,7 +107,7 @@ def chat_with_llama():
     messages = [system_prompt]
     
     print("\n" + "="*60)
-    print("Welcome to Llama-3.3-70B Chat!".center(60))
+    print("Welcome to Grok AI Chat!".center(60))
     print("="*60)
     print("Type '/help' to see available commands")
     
@@ -161,16 +164,24 @@ def chat_with_llama():
             # Show typing indicator
             print("Assistant: ", end="", flush=True)
             
-            # Generate response
-            response = client.chat.completions.create(
-                model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
-                messages=messages,
-                temperature=0.7,
-                max_tokens=1024,
+            # Prepare the request payload
+            payload = {
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 1024
+            }
+            
+            # Make API request to Grok
+            response = requests.post(
+                "https://api.grok.ai/v1/chat/completions",
+                headers=headers,
+                json=payload
             )
+            response.raise_for_status()
+            response_data = response.json()
             
             # Get assistant message
-            assistant_message = response.choices[0].message.content
+            assistant_message = response_data["choices"][0]["message"]["content"]
             
             # Add assistant message to history
             messages.append({"role": "assistant", "content": assistant_message})

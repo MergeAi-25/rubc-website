@@ -211,11 +211,38 @@ const MODEL = 'meta-llama/Llama-3-70b-chat-hf';
 
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json();
-    const lastMessage = messages[messages.length - 1].content;
+    const body = await request.json();
+    
+    // Validate that messages exists and is an array
+    if (!body.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
+      return NextResponse.json(
+        {
+          message: 'Invalid request format. Messages array is required.',
+          verses: [],
+          explanation: '',
+          suggestedTopics: Object.keys(bibleTopics)
+        },
+        { status: 400 }
+      );
+    }
+
+    const lastMessage = body.messages[body.messages.length - 1];
+    
+    // Validate the last message has the required properties
+    if (!lastMessage || typeof lastMessage.content !== 'string') {
+      return NextResponse.json(
+        {
+          message: 'Invalid message format. Each message must have a content property.',
+          verses: [],
+          explanation: '',
+          suggestedTopics: Object.keys(bibleTopics)
+        },
+        { status: 400 }
+      );
+    }
 
     // Try to find a matching topic in our local database first
-    const match = findBestMatch(lastMessage);
+    const match = findBestMatch(lastMessage.content);
     if (match) {
       const response = generateResponse(match);
       return NextResponse.json(response);
@@ -231,7 +258,7 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           model: MODEL,
-          messages: messages,
+          messages: body.messages,
           max_tokens: 1024,
           temperature: 0.7,
           top_p: 0.7,
