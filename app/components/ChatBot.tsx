@@ -3,9 +3,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaComments, FaPaperPlane, FaTimes } from 'react-icons/fa';
 
+type MessageRole = 'system' | 'user' | 'assistant';
+
+interface Message {
+  text: string;
+  isUser: boolean;
+  role: MessageRole;
+}
+
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean; role: 'user' | 'assistant' | 'system' }>>([
+  const [messages, setMessages] = useState<Message[]>([
     { 
       text: 'Hello! I\'m here to help you with Bible study and answer questions about Rise-Up Bible Church. How can I assist you today?',
       isUser: false,
@@ -29,10 +37,9 @@ const ChatBot = () => {
     if (!inputText.trim() || isLoading) return;
 
     // Add user message
-    const newMessages = [
-      ...messages,
-      { text: inputText, isUser: true, role: 'user' },
-    ];
+    const newUserMessage: Message = { text: inputText, isUser: true, role: 'user' };
+    const newMessages = [...messages, newUserMessage];
+    
     setMessages(newMessages);
     setInputText('');
     setIsLoading(true);
@@ -73,20 +80,21 @@ const ChatBot = () => {
         formattedMessage += '\n\nRelated Topics: ' + data.relatedTopics.join(', ');
       }
       
-      setMessages([
-        ...newMessages,
-        { text: formattedMessage, isUser: false, role: 'assistant' },
-      ]);
+      const assistantMessage: Message = {
+        text: formattedMessage,
+        isUser: false,
+        role: 'assistant'
+      };
+      
+      setMessages([...newMessages, assistantMessage]);
     } catch (error) {
       console.error('Error:', error);
-      setMessages([
-        ...newMessages,
-        {
-          text: 'I apologize, but I encountered an error. Please try asking your question again.',
-          isUser: false,
-          role: 'assistant'
-        },
-      ]);
+      const errorMessage: Message = {
+        text: 'I apologize, but I encountered an error. Please try asking your question again.',
+        isUser: false,
+        role: 'assistant'
+      };
+      setMessages([...newMessages, errorMessage]);
     } finally {
       setIsLoading(false);
     }
