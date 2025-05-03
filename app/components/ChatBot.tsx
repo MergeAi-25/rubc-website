@@ -9,15 +9,20 @@ interface Message {
   text: string;
   isUser: boolean;
   role: MessageRole;
+  verses?: string[];
+  explanation?: string;
+  relatedTopics?: string[];
+  suggestedTopics?: string[];
 }
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { 
-      text: 'Hello! I\'m here to help you with Bible study and answer questions about Rise-Up Bible Church. How can I assist you today?',
+      text: 'Hello! I\'m here to help you with Bible study and answer questions about Rise-Up Bible Church. What would you like to know about?',
       isUser: false,
-      role: 'assistant'
+      role: 'assistant',
+      suggestedTopics: ['salvation', 'prayer', 'faith', 'grace', 'church', 'worship', 'baptism']
     },
   ]);
   const [inputText, setInputText] = useState('');
@@ -31,6 +36,10 @@ const ChatBot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleTopicClick = (topic: string) => {
+    setInputText(`Tell me about ${topic}`);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,22 +77,14 @@ const ChatBot = () => {
         throw new Error(data.error);
       }
       
-      // Create a formatted message that includes verses and explanation if available
-      let formattedMessage = data.message;
-      if (data.verses && data.verses.length > 0) {
-        formattedMessage += '\n\nScripture References:\n' + data.verses.join('\n');
-      }
-      if (data.explanation) {
-        formattedMessage += '\n\n' + data.explanation;
-      }
-      if (data.relatedTopics && data.relatedTopics.length > 0) {
-        formattedMessage += '\n\nRelated Topics: ' + data.relatedTopics.join(', ');
-      }
-      
       const assistantMessage: Message = {
-        text: formattedMessage,
+        text: data.message,
         isUser: false,
-        role: 'assistant'
+        role: 'assistant',
+        verses: data.verses || [],
+        explanation: data.explanation,
+        relatedTopics: data.relatedTopics || [],
+        suggestedTopics: data.suggestedTopics
       };
       
       setMessages([...newMessages, assistantMessage]);
@@ -134,7 +135,60 @@ const ChatBot = () => {
                       : 'bg-gray-100 text-gray-800 rounded-bl-none'
                   } transform transition-all duration-300 hover:scale-102`}
                 >
-                  {message.text}
+                  <div className="whitespace-pre-wrap">{message.text}</div>
+
+                  {message.verses && message.verses.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      <p className="font-semibold text-gray-700">Scripture References:</p>
+                      <ul className="list-none space-y-2">
+                        {message.verses.map((verse, i) => (
+                          <li key={i} className={`${message.isUser ? 'bg-primary-light' : 'bg-blue-50'} p-2 rounded`}>
+                            {verse}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {message.explanation && (
+                    <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
+                      <p className="text-gray-700">{message.explanation}</p>
+                    </div>
+                  )}
+
+                  {message.relatedTopics && message.relatedTopics.length > 0 && (
+                    <div className="mt-3">
+                      <p className="font-semibold text-gray-700">Related Topics:</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {message.relatedTopics.map((topic, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleTopicClick(topic)}
+                            className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors"
+                          >
+                            {topic}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {message.suggestedTopics && message.suggestedTopics.length > 0 && (
+                    <div className="mt-3">
+                      <p className="font-semibold text-gray-700">Available Topics:</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {message.suggestedTopics.map((topic, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleTopicClick(topic)}
+                            className="px-3 py-1 bg-green-500 text-white rounded-full text-sm hover:bg-green-600 transition-colors"
+                          >
+                            {topic}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -159,7 +213,7 @@ const ChatBot = () => {
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Type your message..."
+                placeholder="Ask about Bible topics, verses, or church teachings..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
                 disabled={isLoading}
               />
@@ -180,4 +234,4 @@ const ChatBot = () => {
   );
 };
 
-export default ChatBot; 
+export default ChatBot;
